@@ -1,13 +1,21 @@
 [tool.poetry]
 name = "water_use_zhou"
 version = "0.1.0"
-description = ""
+description = "处理中国用水数据"
 authors = ["SongshGeo <songshgeo@gmail.com>"]
 readme = "README.md"
-packages = [{include = "water_uses_ch", from = "src"}]
+packages = [{include = "src"}]
+include = [
+    "items.json",
+    "GIS Shapefile/.",
+]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+geopandas = "^0.12.2"
+pint-pandas = "^0.3"
+matplotlib = "^3.7.1"
+openpyxl = "^3.1.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.2.1"
@@ -22,6 +30,7 @@ isort = "^5.12.0"
 nbstripout = "^0.6.1"
 pydocstyle = "^6.3.0"
 pre-commit-hooks = "^4.4.0"
+sourcery = "^1.0.6"
 
 [build-system]
 requires = ["poetry-core"]

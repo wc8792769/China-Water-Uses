@@ -127,4 +127,36 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+.idea/
+data
+.vscode
+
+# LaTeX
+*.synctex(busy)
+*.aux
+*.bbl
+*.blg
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+*.out
+*.spl
+*.bcf
+*.run.xml
+/notebooks/playground.ipynb
+*.pkl
+*.pyc
+
+# pytest & allure
+tmp
+.virtual_documents
+
+# poetry
 poetry.lock
+
+# Hydra
+outputs
+multirun
+
+# MacOS
+.DS_Store

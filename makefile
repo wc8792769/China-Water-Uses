@@ -2,6 +2,7 @@ setup:
 	make install-tests
 	make install-jupyter
 	make setup-pre-commit
+	make setup-organizor
 
 # 安装必要的代码检查工具
 # black: https://github.com/psf/black
@@ -10,6 +11,11 @@ setup:
 # nbstripout: https://github.com/kynan/nbstripout
 # pydocstyle: https://github.com/PyCQA/pydocstyle
 # pre-commit-hooks: https://github.com/pre-commit/pre-commit-hooks
+
+setup-organizor:
+	poetry add hydra-core
+	poetry add --group dev sourcery
+
 setup-pre-commit:
 	poetry add --group dev flake8 isort nbstripout pydocstyle pre-commit-hooks
 	poetry run pre-commit install
