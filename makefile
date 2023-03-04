@@ -44,3 +44,6 @@ install-docs:
 	# poetry add --group docs mkdocs-jupyter
 	poetry add --group docs mkdocs-callouts
 	poetry add --group docs mkdocs-glightbox
+
+obsidian-docs:
+	git clone --depth=1 git@github.com:SongshGeo/Obsidian-MkDocs-Vault-Template.git .obsidian
