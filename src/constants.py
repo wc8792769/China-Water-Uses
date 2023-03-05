@@ -114,7 +114,7 @@ MEASUREMENTS = {
 }
 
 GENERAL_COLUMNS = {
-    "City_ID": "地级市",
+    "City_ID": "市",
     "Year": "年份",
     "Province_n": "省份",
     # "area": "市面积",
@@ -123,8 +123,8 @@ GENERAL_COLUMNS = {
 
 def selecting(pool: Cols, include: Cols = None, exclude: Cols = None) -> Cols:
     """从可迭代对象中选取某些条目"""
-    include = set(pool) if include is None else set(include)
-    exclude = set() if exclude is None else set(exclude)
+    include = set(pool) if include is None else set(make_list(include, True))
+    exclude = set() if exclude is None else set(make_list(exclude, True))
     if invalid := (set(include) | set(exclude)).difference(pool):
         logger.warning("Invalid items: %s.", invalid)
     included = set(pool).intersection(set(include))
@@ -133,8 +133,6 @@ def selecting(pool: Cols, include: Cols = None, exclude: Cols = None) -> Cols:
 
 def select_items(measurements=None, sectors=None):
     """从原始数据中选择所有数值条目"""
-    measurements = make_list(measurements, keep_none=True)
-    sectors = make_list(sectors, keep_none=True)
     if measurements is None:
         measurements = ["WUI", "WU"]
     sectors = selecting(SECTORS, include=sectors)

@@ -112,6 +112,7 @@ URB_WUI = ["Urban domestic WUI", "Urban service WUI"]
 
 
 def test_selections():
+    """测试每一个选取的项目（列名）都符合预期"""
     # for each sectors
     assert select_items(sectors="IRR", measurements="WU") == IRR_WU
     assert select_items(sectors="IND", measurements="WU") == IND_WU
@@ -138,6 +139,7 @@ def test_selections():
 
 
 def test_summary():
+    """测试每个部门的总用水量，加起来都一样"""
     for i in (data[[f"Irrigation WU: {crop}" for crop in IRR]].sum(axis=1) / 1e5).round(
         5
     ) == data["IRR"].round(5):
