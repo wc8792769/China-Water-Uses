@@ -7,15 +7,15 @@
 
 # from typing import List, Union
 
-# import geopandas as gpd
-from typing import Set
+from typing import List, Set
 
+import geopandas as gpd
 import pandas as pd
 import pint_pandas
 import pkg_resources
 
 # from IPython import display
-# from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt
 from pint import UnitRegistry
 
 from src.constants import (
@@ -278,9 +278,12 @@ class ChineseWater:
     #             result[col] = df[col].pint.to(to)
     #     return result
 
-    # def to_spatial(self, cities: List[str]) -> gpd.GeoDataFrame:
-    #     gdf = gpd.read_file(MAP)
-    #     return gdf[gdf["Perfecture"].isin(cities)]
+    def _cities_shp(self, cities: List[str] = None) -> gpd.GeoDataFrame:
+        """获取城市的空间范围信息"""
+        if cities is None:
+            cities = self.cities
+        gdf = gpd.read_file(MAP)
+        return gdf[gdf["Perfecture"].isin(cities)]
 
     # def viz_item_spatially(self, item, year: Union[int, str] = "mean"):
     #     pass
@@ -313,45 +316,43 @@ class ChineseWater:
     # def dequantify(self, data):
     #     return data.pint.dequantify().droplevel(1, axis=1)
 
-    # def combine_spatial(self, data: pd.Series):
-    #     data = data.reset_index()
-    #     merged = pd.merge(
-    #         left=data,
-    #         right=self.geodf,
-    #         left_on="City_ID",
-    #         right_on="Perfecture",
-    #         how="left",
-    #     )
-    #     return gpd.GeoDataFrame(merged)
+    def geodata(self, data=None) -> gpd.GeoDataFrame:
+        """转化为空间数据"""
+        if data is None:
+            data = self.data
+        geodf = self._cities_shp(data.City_ID.unique())
+        merged = pd.merge(
+            left=data,
+            right=geodf,
+            left_on="City_ID",
+            right_on="Perfecture",
+            how="left",
+        )
+        return gpd.GeoDataFrame(merged)
 
-    # def scaled_plots(self, data, column, shapefile, ax=None, **kwargs):
-    #     if ax is None:
-    #         _, ax = plt.subplots()
-    #     if isinstance(data, gpd.GeoDataFrame):
-    #         pass
-    #     elif isinstance(data, pd.DataFrame):
-    #         data = gpd.GeoDataFrame(data)
-    #     elif isinstance(data, pd.Series):
-    #         data = self.combine_spatial(data)
-    #     data = gpd.GeoDataFrame(self.dequantify(data))
-    #     legend = kwargs.pop("legend", False)
-    #     ax = shapefile.boundary.plot(edgecolor="black", lw=1, ls=":", label="YR", ax=ax)
-    #     ax = data.plot(
-    #         ax=ax,
-    #         column=column,
-    #         cmap="Reds",
-    #         edgecolor="white",
-    #         linewidth=0.5,
-    #         scheme="NaturalBreaks",
-    #         k=5,
-    #         legend=legend,
-    #         legend_kwds={
-    #             "loc": "upper left",
-    #             "title": f"{column}",
-    #         },
-    #         **kwargs,
-    #     )
-    #     ax.grid(color="lightgray", ls="--")
-    #     ax.set_xlabel("Longitude [$Degree$]")
-    #     ax.set_ylabel("Latitude [$Degree$]")
-    #     return ax
+    def scaled_plots(self, col, data=None, ax=None, **kwargs):
+        """根据某一列的值制作分级设色专题图"""
+        if ax is None:
+            _, ax = plt.subplots()
+        geodata = self.geodata(data=data)
+        legend = kwargs.pop("legend", False)
+        # ax = shapefile.boundary.plot(edgecolor="black", lw=1, ls=":", label="YR", ax=ax)
+        ax = geodata.plot(
+            ax=ax,
+            column=col,
+            cmap="Reds",
+            edgecolor="white",
+            linewidth=0.5,
+            # scheme="NaturalBreaks",
+            k=5,
+            legend=legend,
+            legend_kwds={
+                "loc": "upper left",
+                "title": f"{col}",
+            },
+            **kwargs,
+        )
+        ax.grid(color="lightgray", ls="--")
+        ax.set_xlabel("Longitude [$Degree$]")
+        ax.set_ylabel("Latitude [$Degree$]")
+        return ax
