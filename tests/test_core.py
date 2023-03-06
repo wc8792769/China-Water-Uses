@@ -20,3 +20,10 @@ def test_change_scopes():
     assert cw.data.shape == (4092, 18)
     cw.update_scope("Province_n", ["Anhui", "Chongqing"])
     assert cw.data.shape == (204, 18)
+    # 更新条目
+    cw.update_scope(
+        "items",
+        include=["Irrigation water-use intensity (WUI): Rice"],
+        exclude="Irrigation water-use intensity (WUI): Others",
+    )
+    assert cw.data.shape == (204, 4)

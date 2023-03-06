@@ -9,7 +9,7 @@
 
 import logging
 import os
-from typing import List, Optional, Set
+from typing import Dict, List, Optional, Set
 
 import geopandas as gpd
 import pandas as pd
@@ -21,6 +21,7 @@ from china_water_use.constants import (
     GENERAL_COLUMNS,
     MEASUREMENTS,
     SECTORS,
+    make_list,
     select_items,
     selecting,
 )
@@ -50,8 +51,8 @@ class ChineseWater:
         self._cities = set(data["City_ID"].unique())
         self._sectors = None
         self._measurements = None
-        self._include = None
-        self._exclude = None
+        self._include = set()
+        self._exclude = set()
 
     # def __repr__(self):
     #     display.display(self.show_data())
@@ -72,7 +73,18 @@ class ChineseWater:
         """根据当前的范围过滤后的数据"""
         time = self.origin["Year"].isin(self.time)
         cities = self.origin["City_ID"].isin(self.cities)
-        return self.origin.loc[(time & cities), [*GENERAL_COLUMNS, *self.items]]
+        cols = selecting(self.items, self.include, self.exclude)
+        return self.origin.loc[(time & cities), [*GENERAL_COLUMNS, *cols]]
+
+    @property
+    def include(self) -> Set[str]:
+        """要包括的条目"""
+        return self._include or None
+
+    @property
+    def exclude(self) -> Set[str]:
+        """要排除的条目"""
+        return self._exclude or None
 
     @property
     def cities(self) -> Set[str]:
@@ -92,7 +104,7 @@ class ChineseWater:
     @property
     def items(self) -> Set[str]:
         """根据当前研究的范围，可能的列"""
-        return select_items(measurements=self.measurements, sectors=self.sectors)
+        return set(select_items(measurements=self.measurements, sectors=self.sectors))
 
     @property
     def index(self) -> pd.DataFrame:
@@ -127,13 +139,16 @@ class ChineseWater:
             scope = selecting(MEASUREMENTS, include=include, exclude=exclude)
         elif key == "sectors":
             scope = selecting(SECTORS, include=include, exclude=exclude)
+        elif key == "items":
+            self._include.update(make_list(include, keep_none=False))
+            self._exclude.update(make_list(exclude, keep_none=False))
+            return None
         elif key in GENERAL_COLUMNS:
             key, scope = self._update_samples(key, include, exclude)
         else:
             raise KeyError(f"{key} is not a valid scope.")
         old_scope = getattr(self, key)
         setattr(self, f"_{key}", set(scope) & set(old_scope))
-        return getattr(self, key)
 
     def _update_samples(self, key, include=None, exclude=None):
         mapping = {"Year": "time", "City_ID": "cities"}
@@ -150,6 +165,27 @@ class ChineseWater:
         else:
             raise KeyError(f"Invalid update operation: {key}")
         return key, scope
+
+    def clear(self, *args, **scopes: Dict[str, bool]):
+        """清除已经添加的关注范围"""
+        valid_scopes = "time, cities, measurements, sectors, include, exclude"
+        # clear all if not assigned specific scopes.
+        if not args and not scopes:
+            args = valid_scopes
+        clear = []
+
+        def clear_scope(scope):
+            if scope not in valid_scopes:
+                raise KeyError(f"{scope} is not a valid scope: {valid_scopes}.")
+            setattr(self, f"_{scope}", set())
+            clear.append(scope)
+
+        for arg in args:
+            clear_scope(arg)
+        for scope, bool_ in scopes.items():
+            if bool_:
+                clear_scope(scope)
+        logger.info(f"{', '.join(clear)} cleared.")
 
     # @property
     # def show_versions(self):
@@ -219,9 +255,11 @@ class ChineseWater:
                 result[col] = result[col].astype(unit)
                 # print(f'converting {col} from {unit} to {converter[col]}...')
                 result[col] = result[col].pint.to(converter[col])
+                if dequantify:
+                    result[col].pint.dequantify()
             else:
                 logger.warning(f"Failed to get unit of {col}.")
-        return result.pint.dequantify() if dequantify else result
+        return result
 
     def _cities_shp(self, cities: List[str] = None) -> gpd.GeoDataFrame:
         """获取城市的空间范围信息"""

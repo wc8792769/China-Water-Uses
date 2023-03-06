@@ -9,7 +9,7 @@ import pandas as pd
 
 from china_water_use.constants import IRR, select, select_items
 
-data = pd.read_csv("src/data/values_data.csv")
+data = pd.read_csv("china_water_use/data/values_data.csv")
 all_columns = data.columns
 
 selection = [
