@@ -5,10 +5,7 @@ description = "处理中国用水数据"
 authors = ["SongshGeo <songshgeo@gmail.com>"]
 readme = "README.md"
 packages = [{include = "src"}]
-include = [
-    "items.json",
-    "GIS Shapefile/.",
-]
+include = ["src/data/*"]
 
 [tool.poetry.dependencies]
 python = "^3.11"

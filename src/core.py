@@ -8,11 +8,11 @@
 # from typing import List, Union
 
 import logging
+import os
 from typing import List, Optional, Set
 
 import geopandas as gpd
 import pandas as pd
-import pkg_resources
 
 # from IPython import display
 from matplotlib import pyplot as plt
@@ -29,13 +29,14 @@ from src.units import UNITS
 logger = logging.getLogger(__name__)
 pd.options.display.float_format = "{:,.2f}".format
 
-NAME = r"/data/values_data.csv"
-DATA = pkg_resources.resource_filename("src", NAME)
+# get path to the data folder
+data_path = os.path.join(os.path.dirname(__file__), "data")
 
-# YR_GDF = gpd.read_file(r"data/source/YR_shapefile/huanghe.shp")
-
-ITEMS = pkg_resources.resource_filename("src", "data/items.json")
-MAP = pkg_resources.resource_filename("src", "data/GIS Shapefile/perfectures.shp")
+# load dataset
+NAME = r"values_data.csv"
+DATA = os.path.join(data_path, NAME)
+ITEMS = os.path.join(data_path, "items.json")
+MAP = os.path.join(data_path, "GIS Shapefile/perfectures.shp")
 
 
 class ChineseWater:
