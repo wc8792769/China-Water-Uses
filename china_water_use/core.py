@@ -242,7 +242,7 @@ class ChineseWater:
     ) -> pd.DataFrame:
         """将数据集里的特定列转化成指定的单位"""
         result = self.data.copy()
-        items = self.data.columns.to_list()
+        items = selecting(self.items, self.include, self.exclude)
         if isinstance(converter, str):
             converter = {item: converter for item in items}
         elif isinstance(converter, dict):
