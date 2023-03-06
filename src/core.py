@@ -7,16 +7,15 @@
 
 # from typing import List, Union
 
-from typing import List, Set
+import logging
+from typing import List, Optional, Set
 
 import geopandas as gpd
 import pandas as pd
-import pint_pandas
 import pkg_resources
 
 # from IPython import display
 from matplotlib import pyplot as plt
-from pint import UnitRegistry
 
 from src.constants import (
     GENERAL_COLUMNS,
@@ -25,6 +24,10 @@ from src.constants import (
     select_items,
     selecting,
 )
+from src.units import UNITS
+
+logger = logging.getLogger(__name__)
+pd.options.display.float_format = "{:,.2f}".format
 
 NAME = r"/data/values_data.csv"
 DATA = pkg_resources.resource_filename("src", NAME)
@@ -33,16 +36,6 @@ DATA = pkg_resources.resource_filename("src", NAME)
 
 ITEMS = pkg_resources.resource_filename("src", "data/items.json")
 MAP = pkg_resources.resource_filename("src", "data/GIS Shapefile/perfectures.shp")
-
-ureg = UnitRegistry()  # 注册单位
-# 使用这里的注册单位成为 Pandas-pint 的注册单位，详见：
-# https://github.com/hgrecco/pint-pandas/blob/master/notebooks/pint-pandas.ipynb
-pint_pandas.PintType.ureg = ureg
-pd.options.display.float_format = "{:,.2f}".format
-# 为了让pandas-pint 可以画图，需要这样注册，详见：
-# https://github.com/hgrecco/pint-pandas/blob/master/notebooks/pint-pandas.ipynb
-pint_pandas.PintType.ureg.setup_matplotlib()
-ureg.define("TMC = 1e8 m ** 3")
 
 
 class ChineseWater:
@@ -103,7 +96,7 @@ class ChineseWater:
     @property
     def index(self) -> pd.DataFrame:
         """属性列"""
-        return self.data[GENERAL_COLUMNS]
+        return self.data[GENERAL_COLUMNS.keys()]
 
     def update_scope(self, key, include=None, exclude=None):
         """更新本次关心的数据范围，更新'measurements'和'sectors'
@@ -158,53 +151,8 @@ class ChineseWater:
         return key, scope
 
     # @property
-    # def active_cols(self):
-    #     return self.origin.columns.levels[0].to_list()
-
-    # @property
-    # def active(self) -> dict:
-    #     return self._active
-
-    # @active.setter
-    # def active(self, value: dict):
-    #     self._active = value
-
-    # @origin.setter
-    # def origin(self, value: pd.DataFrame):
-    #     self._origin = value
-    #     self._parse_items()
-
-    # # @property
-    # # def versions(self):
-    # #     return pint_pandas.show_versions()
-
-    # @property
-    # def geodf(self):
-    #     return self.to_spatial(self.cities)
-
-    # def _get_item_data(
-    #     self, item: str, folding: bool = True
-    # ) -> Union[pd.Series, pd.DataFrame]:
-    #     """
-    #     根据
-
-    #     Args:
-    #         item (str): _description_
-    #         folding (bool, optional): _description_. Defaults to True.
-
-    #     Returns:
-    #         Union[pd.Series, pd.DataFrame]: _description_
-    #     """
-    #     if item in self._multi_items_cols:
-    #         data = self.active[item]
-    #         if folding:
-    #             item_data = data["Total"]
-    #             item_data.name = item
-    #         else:
-    #             item_data = data.drop("Total", axis=1)
-    #     elif item in self.active_cols:
-    #         item_data = self.active[item]
-    #     return item_data
+    # def show_versions(self):
+    #     return pint_pandas.show_versions()
 
     # def show_data(self, folding: bool = True, sep: str = ":") -> pd.DataFrame:
     #     dataset = []
@@ -215,24 +163,6 @@ class ChineseWater:
     #             data.columns = [col + sep + c for c in data.columns]
     #         dataset.append(data)
     #     return pd.concat(dataset, axis=1)
-
-    # def show_items(self):
-    #     return pd.read_json(ITEMS).set_index("item")
-
-    # def _parse_items(self):
-    #     active = {}
-    #     for col in self.active_cols:
-    #         tmp_df = self.origin[col]
-    #         if col in self._multi_items_cols:
-    #             use_col = tmp_df
-    #         else:
-    #             use_col = tmp_df.iloc[:, 0]
-    #             use_col.name = col
-    #         active[col] = use_col
-    #     self.active = active
-
-    # def _filter_general_cols(self, items: List[str]) -> List[str]:
-    #     return list(set(items) - set(self._general_cols))
 
     # def get_item(self, item: str, unit: bool = True) -> pd.DataFrame:
     #     """读取周丰老师中国用水数据的函数，选取某个项目"""
@@ -251,12 +181,13 @@ class ChineseWater:
     #         data.name = name
     #     return pd.concat([self.index, data], axis=1)
 
-    # def get_unit_of_item(self, item):
-    #     try:
-    #         unit = f"pint[{UNITS[item]}]"
-    #     except KeyError as e:
-    #         raise e(f"Not registered unit of item: '{item}'!") from e
-    #     return unit
+    def get_unit_of_item(self, item: str) -> str:
+        """获取某列的单位"""
+        try:
+            unit = f"pint[{UNITS[item]}]"
+        except KeyError as e:
+            raise e(f"Not registered unit of item: '{item}'!") from e
+        return unit
 
     # def filter_prefectures(
     #     self, cities: List[str], as_origin: bool = False
@@ -269,14 +200,27 @@ class ChineseWater:
     #         self.origin = filtered
     #     return filtered
 
-    # @staticmethod
-    # def convert_unit(df: pd.DataFrame, cols: List[str], to: str) -> pd.DataFrame:
-    #     """将数据集里的特定列转化成指定的单位"""
-    #     result = df.copy()
-    #     for col in df:
-    #         if col in cols:
-    #             result[col] = df[col].pint.to(to)
-    #     return result
+    def units(
+        self, converter: Optional[str] = None, dequantify: bool = True
+    ) -> pd.DataFrame:
+        """将数据集里的特定列转化成指定的单位"""
+        result = self.data.copy()
+        if isinstance(converter, str):
+            converter = {item: converter for item in self.items}
+        elif isinstance(converter, dict):
+            pass
+        elif hasattr(converter, "__iter__"):
+            converter = {col: converter[i] for i, col in enumerate(self.items)}
+        else:
+            raise TypeError(f"Invalid mapping type: {type(converter)}")
+        for col in self.items:
+            if unit := self.get_unit_of_item(col):
+                result[col] = result[col].astype(unit)
+                # print(f'converting {col} from {unit} to {converter[col]}...')
+                result[col] = result[col].pint.to(converter[col])
+            else:
+                logger.warning(f"Failed to get unit of {col}.")
+        return result.pint.dequantify() if dequantify else result
 
     def _cities_shp(self, cities: List[str] = None) -> gpd.GeoDataFrame:
         """获取城市的空间范围信息"""

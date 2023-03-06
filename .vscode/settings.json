@@ -2,5 +2,8 @@
     "conventionalCommits.scopes": [
         "project",
         "ChineseWater"
+    ],
+    "cSpell.words": [
+        "dequantify"
     ]
 }

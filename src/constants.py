@@ -39,15 +39,6 @@ SUMMARY = {
 
 SECTORS = {"IRR": "农业", "IND": "工业", "RUR": "农村", "URB": "城市"}
 
-
-UNITS = {
-    "Irrigation water-use intensity (WUI)": "mm * kha**-1",
-    "Irrigated area": "kha",
-    "Total water use": "km ** 3",
-    "IRR": "km ** 3",
-}
-
-
 IRR = {
     "Rice": "水稻",
     "Wheat": "小麦",
