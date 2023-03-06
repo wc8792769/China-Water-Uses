@@ -242,15 +242,16 @@ class ChineseWater:
     ) -> pd.DataFrame:
         """将数据集里的特定列转化成指定的单位"""
         result = self.data.copy()
+        items = self.data.columns.to_list()
         if isinstance(converter, str):
-            converter = {item: converter for item in self.items}
+            converter = {item: converter for item in items}
         elif isinstance(converter, dict):
             pass
         elif hasattr(converter, "__iter__"):
-            converter = {col: converter[i] for i, col in enumerate(self.items)}
+            converter = {col: converter[i] for i, col in enumerate(items)}
         else:
             raise TypeError(f"Invalid mapping type: {type(converter)}")
-        for col in self.items:
+        for col in items:
             if unit := self.get_unit_of_item(col):
                 result[col] = result[col].astype(unit)
                 # print(f'converting {col} from {unit} to {converter[col]}...')
