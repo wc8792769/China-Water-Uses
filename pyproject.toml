@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "china-water-use"
-version = "0.2.1"
+version = "0.2.3"
 description = "处理中国用水数据"
 authors = ["SongshGeo <songshgeo@gmail.com>"]
 readme = "README.md"
