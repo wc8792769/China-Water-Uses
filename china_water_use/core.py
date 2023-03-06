@@ -17,14 +17,14 @@ import pandas as pd
 # from IPython import display
 from matplotlib import pyplot as plt
 
-from src.constants import (
+from china_water_use.constants import (
     GENERAL_COLUMNS,
     MEASUREMENTS,
     SECTORS,
     select_items,
     selecting,
 )
-from src.units import UNITS
+from china_water_use.units import UNITS
 
 logger = logging.getLogger(__name__)
 pd.options.display.float_format = "{:,.2f}".format

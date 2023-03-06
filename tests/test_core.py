@@ -5,7 +5,7 @@
 # GitHub   : https://github.com/SongshGeo
 # Website: https://cv.songshgeo.com/
 
-from src.core import ChineseWater
+from china_water_use.core import ChineseWater
 
 
 def test_change_scopes():

@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "处理中国用水数据"
 authors = ["SongshGeo <songshgeo@gmail.com>"]
 readme = "README.md"
-packages = [{include = "src"}]
+packages = [{include = "china_water_use"}]
 include = ["src/data/*"]
 
 [tool.poetry.dependencies]

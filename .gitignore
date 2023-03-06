@@ -161,4 +161,4 @@ multirun
 # MacOS
 .DS_Store
 .obsidian
-!src/data
+!china_water_use/data

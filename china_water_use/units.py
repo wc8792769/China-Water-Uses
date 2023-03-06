@@ -8,7 +8,7 @@
 import pint_pandas
 from pint import UnitRegistry
 
-from src.constants import SUMMARY, select_items
+from china_water_use.constants import SUMMARY, select_items
 
 ureg = UnitRegistry()  # 注册单位
 # 使用这里的注册单位成为 Pandas-pint 的注册单位，详见：
