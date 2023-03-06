@@ -257,7 +257,7 @@ class ChineseWater:
                 result[col] = result[col].pint.to(converter[col])
             else:
                 logger.warning(f"Failed to get unit of {col}.")
-        return result.pint.dequantify(level=-1) if dequantify else result
+        return result.pint.dequantify().droplevel(1, axis=1) if dequantify else result
 
     def _cities_shp(self, cities: List[str] = None) -> gpd.GeoDataFrame:
         """获取城市的空间范围信息"""
