@@ -29,6 +29,13 @@ pydocstyle = "^6.3.0"
 pre-commit-hooks = "^4.4.0"
 sourcery = "^1.0.6"
 
+
+[[tool.poetry.source]]
+name = "ali"
+url = "https://mirrors.aliyun.com/pypi/simple/"
+default = true
+secondary = false
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
