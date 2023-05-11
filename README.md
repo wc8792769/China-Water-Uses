@@ -56,7 +56,7 @@ sectors = cwu.update_scope("sectors", "IRR")
 cwu.data.head()
 
 # 转换单位为 mm / km^2
-data = cwu.units(data, unit='mm * km**-2')
+data = cwu.units('mm * km**-2')
 
 # 绘制数据
 print(cwu.items)  # 显示缩小关注范围后选定的条目
